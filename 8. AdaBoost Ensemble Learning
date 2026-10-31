@@ -1,14 +1,17 @@
+import matplotlib.pyplot as plt
+
 from sklearn.datasets import load_iris
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import AdaBoostClassifier
 from sklearn.metrics import accuracy_score, classification_report
 
+# 1. Load Iris dataset
 iris = load_iris()
-
 X = iris.data
 y = iris.target
 
+# 2. Split dataset into training and testing data
 X_train, X_test, y_train, y_test = train_test_split(
     X,
     y,
@@ -17,37 +20,68 @@ X_train, X_test, y_train, y_test = train_test_split(
     stratify=y
 )
 
-weak_model = DecisionTreeClassifier(
+# 3. Create weak classifier
+weak_classifier = DecisionTreeClassifier(
     max_depth=1,
     random_state=42
 )
 
-weak_model.fit(X_train, y_train)
+# 4. Train individual weak classifier
+weak_classifier.fit(X_train, y_train)
 
-weak_pred = weak_model.predict(X_test)
+# 5. Predict using weak classifier
+y_pred_weak = weak_classifier.predict(X_test)
 
-weak_accuracy = accuracy_score(y_test, weak_pred)
+# 6. Calculate weak classifier accuracy
+weak_accuracy = accuracy_score(y_test, y_pred_weak)
 
-print("Weak Classifier Accuracy:", weak_accuracy)
+print("Individual Weak Classifier Accuracy:", weak_accuracy)
 
-model = AdaBoostClassifier(
+# 7. Create AdaBoost ensemble
+adaboost_model = AdaBoostClassifier(
+    estimator=DecisionTreeClassifier(
+        max_depth=1,
+        random_state=42
+    ),
     n_estimators=50,
+    learning_rate=1.0,
     random_state=42
 )
 
-model.fit(X_train, y_train)
+# 8. Train AdaBoost model
+adaboost_model.fit(X_train, y_train)
 
-y_pred = model.predict(X_test)
+# 9. Make predictions
+y_pred_boost = adaboost_model.predict(X_test)
 
-accuracy = accuracy_score(y_test, y_pred)
+# 10. Calculate AdaBoost accuracy
+boost_accuracy = accuracy_score(y_test, y_pred_boost)
 
-print("\nAdaBoost Accuracy:", accuracy)
+print("AdaBoost Accuracy:", boost_accuracy)
 
-print("\nClassification Report:")
+# 11. Classification report
+print("\nAdaBoost Classification Report:")
+
 print(
     classification_report(
         y_test,
-        y_pred,
+        y_pred_boost,
         target_names=iris.target_names
     )
 )
+
+# 12. Compare results
+print("\nPerformance Comparison:")
+print("Weak Classifier Accuracy:", weak_accuracy)
+print("AdaBoost Accuracy:", boost_accuracy)
+
+# 13. Visualization
+models = ["Weak Classifier", "AdaBoost"]
+accuracies = [weak_accuracy, boost_accuracy]
+
+plt.bar(models, accuracies)
+plt.ylabel("Accuracy")
+plt.xlabel("Model")
+plt.title("Weak Classifier vs AdaBoost")
+plt.ylim(0, 1.1)
+plt.show()
