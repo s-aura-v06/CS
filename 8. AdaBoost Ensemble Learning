@@ -1,0 +1,53 @@
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import AdaBoostClassifier
+from sklearn.metrics import accuracy_score, classification_report
+
+iris = load_iris()
+
+X = iris.data
+y = iris.target
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X,
+    y,
+    test_size=0.2,
+    random_state=42,
+    stratify=y
+)
+
+weak_model = DecisionTreeClassifier(
+    max_depth=1,
+    random_state=42
+)
+
+weak_model.fit(X_train, y_train)
+
+weak_pred = weak_model.predict(X_test)
+
+weak_accuracy = accuracy_score(y_test, weak_pred)
+
+print("Weak Classifier Accuracy:", weak_accuracy)
+
+model = AdaBoostClassifier(
+    n_estimators=50,
+    random_state=42
+)
+
+model.fit(X_train, y_train)
+
+y_pred = model.predict(X_test)
+
+accuracy = accuracy_score(y_test, y_pred)
+
+print("\nAdaBoost Accuracy:", accuracy)
+
+print("\nClassification Report:")
+print(
+    classification_report(
+        y_test,
+        y_pred,
+        target_names=iris.target_names
+    )
+)
